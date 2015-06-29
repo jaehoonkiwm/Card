@@ -1,6 +1,7 @@
 package com.hoon.card;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,8 +16,8 @@ import java.util.Collections;
 
 
 public class GameActivity extends Activity{
-    private int stage;
-    private int score, points;
+    private int stage, score, points;
+    private int preScore;
     private int numberOfCards;
     private int time = 70;
     private int row;
@@ -37,6 +38,10 @@ public class GameActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        Intent intent = getIntent();
+        stage = intent.getIntExtra("stage", 0);
+        preScore = intent.getIntExtra("preScore", 0);
 
         mainLayout = (LinearLayout) findViewById(R.id.CardsLayout);
         tvScore = (TextView) findViewById(R.id.tvScore);
@@ -130,6 +135,10 @@ public class GameActivity extends Activity{
         setInfo("게임 시작!");
     }
 
+    private void setScore() {
+        tvScore.setText("점수 : " + score);
+    }
+
     private void setTime(int time) {
         tvTime.setText("남은시간 : " + time);
     }
@@ -157,9 +166,12 @@ public class GameActivity extends Activity{
         selectedCard2.setIsCorrect(true);
         setInfo("정답입니다!");
         score += points;
+        setScore();
 
-        if (isGameClear())
-            Toast.makeText(getBaseContext(), "Game Clear", Toast.LENGTH_SHORT).show();
+        if (isGameClear()) {
+            AlertDialog dialog = new AlertDialog(this, score, handler);
+            dialog.show();
+        }
         resetSelectedCards();
     }
 
@@ -219,6 +231,12 @@ public class GameActivity extends Activity{
                 setInfo("틀렸습니다.");
                 setClickAble(true);
                 resetSelectedCards();
+            } else if (msg.what == 3) {
+                Intent intent = new Intent();
+                intent.putExtra("stage", stage);
+                intent.putExtra("prescore", preScore + score);
+                setResult(RESULT_OK, intent);
+                finish();
             }
             return false;
         }
