@@ -48,7 +48,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
         android:layout_weight="0.1"
-        android:id="@+id/CardsLayout"></LinearLayout>
+        android:id="@+id/CardsLayout"
+        android:background="#fff9e4c9"></LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"

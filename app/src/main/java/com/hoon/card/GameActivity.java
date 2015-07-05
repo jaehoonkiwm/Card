@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -16,8 +17,10 @@ import java.util.Collections;
 
 
 public class GameActivity extends Activity{
+    private static final String TAG = "GameActivity";
+    private String name;
     private int stage, score, points;
-    private int preScore;
+    private int preScore, totalScore;
     private int numberOfCards;
     private int time = 70;
     private int row;
@@ -40,8 +43,9 @@ public class GameActivity extends Activity{
         setContentView(R.layout.activity_game);
 
         Intent intent = getIntent();
+        name = intent.getStringExtra("name");
         stage = intent.getIntExtra("stage", 0);
-        preScore = intent.getIntExtra("preScore", 0);
+        preScore = intent.getIntExtra("prescore", 0);
 
         mainLayout = (LinearLayout) findViewById(R.id.CardsLayout);
         tvScore = (TextView) findViewById(R.id.tvScore);
@@ -73,6 +77,7 @@ public class GameActivity extends Activity{
 
         initRandomImages();
         initCards();
+        setName();
         setTime(60);
         handler.sendEmptyMessageDelayed(0, 1000);
     }
@@ -135,6 +140,10 @@ public class GameActivity extends Activity{
         setInfo("게임 시작!");
     }
 
+    private void setName() {
+        tvName.setText(name + " (" + stage+1 + ")");
+    }
+
     private void setScore() {
         tvScore.setText("점수 : " + score);
     }
@@ -169,7 +178,10 @@ public class GameActivity extends Activity{
         setScore();
 
         if (isGameClear()) {
-            AlertDialog dialog = new AlertDialog(this, score, handler);
+            score += time;
+            totalScore = preScore + score;
+            stopTime();
+            AlertDialog dialog = new AlertDialog(this, name, stage, score, totalScore, handler);
             dialog.show();
         }
         resetSelectedCards();
@@ -203,6 +215,10 @@ public class GameActivity extends Activity{
         selectedCard2 = null;
     }
 
+    private void stopTime() {
+        handler.removeMessages(0);
+    }
+
     public Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -234,13 +250,59 @@ public class GameActivity extends Activity{
             } else if (msg.what == 3) {
                 Intent intent = new Intent();
                 intent.putExtra("stage", stage);
-                intent.putExtra("prescore", preScore + score);
+                intent.putExtra("prescore", totalScore);
                 setResult(RESULT_OK, intent);
                 finish();
             }
             return false;
         }
     });
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i(TAG, "onStart");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.i(TAG, "onRestart");
+        stopTime();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.i(TAG, "onBackPressed");
+        //AlertDialog dialog = new AlertDialog(this, name, score, handler);
+       // dialog.show();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop");
+        handler.removeMessages(0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy");
+    }
 
     class CardClickListener implements View.OnClickListener {
 
